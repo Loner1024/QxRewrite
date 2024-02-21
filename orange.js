@@ -1,6 +1,8 @@
 var body = $response.body;
 var path = $request.path;
 
+console.log(path)
+
 var obj = JSON.parse(body);
 
 var data = obj.data
