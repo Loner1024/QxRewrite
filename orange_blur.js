@@ -3,11 +3,11 @@ var path = $request.path
 
 var obj = JSON.parse(body);
 
-if (path == '/1.0/maleInboxCards/list') {
-    for (let profile of obj.data) {
-        profile.userProfile.avatar.picUrl = profile.userProfile.avatar.picUrl.replace('/blur/100x200', '');
-    }
+
+for (let profile of obj.data) {
+    profile.userProfile.avatar.picUrl = profile.userProfile.avatar.picUrl.replace('/blur/100x200', '');
 }
+
 
 var newBody = JSON.stringify(obj);
 
