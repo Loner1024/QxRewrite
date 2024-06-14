@@ -1,10 +1,10 @@
 var body = $response.body;
-var path = $request.path
 
 var obj = JSON.parse(body);
 
-obj.privilege.vipTL = 9999999;
-obj.blockGiftCard = true;
+obj.isVIP = true
+obj.privilege.vipTL = 9999999
+
 
 var newBody = JSON.stringify(obj);
 
