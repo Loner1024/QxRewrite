@@ -8,10 +8,9 @@ obj.isBlackVip = true;
 obj.showExposure = true;
 for (let user of obj.userList) {
     const uid = user.avatar.match(regex);
-    if (uid) {
-        console.log(match[1]);
+    if (uid[1]) {
+        user.uid = uid[1]
     }
-    user.uid = uid
 }
 
 var newBody = JSON.stringify(obj);
