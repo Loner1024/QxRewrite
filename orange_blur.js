@@ -5,7 +5,7 @@ var obj = JSON.parse(body);
 
 
 for (let profile of obj.data) {
-    console.log(profile)
+    console.log(JSON.stringify(profile))
     profile.userProfile.avatar.picUrl = profile.userProfile.avatar.picUrl.replace('/blur/100x200', '');
     profile.modelType = 'UserProfile'
     profile.status = 'liked';
