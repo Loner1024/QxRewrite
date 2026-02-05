@@ -1,24 +1,28 @@
 var body = $response.body;
-var path = $request.path
+var newBody = body;
 
-var obj = JSON.parse(body);
+try {
+    var obj = JSON.parse(body);
+    if (obj && Array.isArray(obj.data)) {
+        for (let profile of obj.data) {
+            profile.modelType = 'UserProfile';
+            profile.status = 'liked';
 
+            var userProfile = profile && profile.userProfile;
+            var avatar = userProfile && userProfile.avatar;
+            var picUrl = avatar && avatar.picUrl;
+            if (typeof picUrl === 'string') {
+                avatar.picUrl = picUrl.replace('/blur/100x200', '');
+            }
 
-for (let profile of obj.data) {
-    profile.modelType = 'UserProfile'
-    profile.status = 'liked';
-    try {
-        profile.userProfile.avatar.picUrl = profile.userProfile.avatar.picUrl.replace('/blur/100x200', '');  
-    } catch (e) {
-        console.log(e);
-        continue;
+            if (profile.fuzzy) {
+                profile.fuzzy = false;
+            }
+        }
+        newBody = JSON.stringify(obj);
     }
-    if(profile.fuzzy) {
-        profile.fuzzy = false;
-    }
+} catch (e) {
+    console.log("orange_blur: skip non-JSON body");
 }
-
-
-var newBody = JSON.stringify(obj);
 
 $done(newBody);

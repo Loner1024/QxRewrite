@@ -1,10 +1,14 @@
 var body = $response.body;
-var path = $request.path
+var newBody = body;
 
-var obj = JSON.parse(body);
-
-obj.membership = 'BASIC';
-
-var newBody = JSON.stringify(obj);
+try {
+    var obj = JSON.parse(body);
+    if (obj && typeof obj === 'object') {
+        obj.membership = 'BASIC';
+        newBody = JSON.stringify(obj);
+    }
+} catch (e) {
+    console.log("orange_membership: skip non-JSON body");
+}
 
 $done(newBody);
