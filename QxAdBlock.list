@@ -1,0 +1,5 @@
+# Quantumult X 分流规则：屏蔽广告
+# 用法：在 [filter_remote] 中引用本文件，或将规则粘贴到 [filter_local]。
+
+# sdk.1rtb.net 广告请求
+HOST, sdk.1rtb.net, REJECT
