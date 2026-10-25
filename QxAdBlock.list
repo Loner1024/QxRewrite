@@ -3,3 +3,6 @@
 
 # sdk.1rtb.net 广告请求
 HOST, sdk.1rtb.net, REJECT
+
+# sdk-log.partner.sm.cn SDK 日志上报（非广告，按需屏蔽）
+HOST, sdk-log.partner.sm.cn, REJECT
