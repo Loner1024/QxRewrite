@@ -5,7 +5,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 function run(url, body) {
-  const code = fs.readFileSync(path.join(__dirname, "..", "bilibili_splash.js"), "utf8");
+  const code = fs.readFileSync(path.join(__dirname, "..", "splash_ad.js"), "utf8");
   let done;
   vm.runInNewContext(code, {
     console,
@@ -14,13 +14,13 @@ function run(url, body) {
     $done: (v) => {
       done = v;
     },
-  }, { filename: "bilibili_splash.js" });
+  }, { filename: "splash_ad.js" });
   return done;
 }
 
 const base = "https://app.bilibili.com";
 
-test("bilibili_splash: splash/list 取消缓存并拉长间隔", () => {
+test("splash_ad: splash/list 取消缓存并拉长间隔", () => {
   const out = run(`${base}/x/v2/splash/list?mobi_app=iphone`, JSON.stringify({
     code: 0,
     message: "OK",
@@ -41,7 +41,7 @@ test("bilibili_splash: splash/list 取消缓存并拉长间隔", () => {
   assert.equal(obj.data.splash_request_id, "req");
 });
 
-test("bilibili_splash: splash/show 和 event/list2 清空广告数组", () => {
+test("splash_ad: splash/show 和 event/list2 清空广告数组", () => {
   const show = JSON.parse(run(`${base}/x/v2/splash/show`, JSON.stringify({
     code: 0,
     data: { show: [{ id: 1, uri: "bilibili://ad" }], splash_request_id: "req" },
@@ -57,7 +57,7 @@ test("bilibili_splash: splash/show 和 event/list2 清空广告数组", () => {
   assert.deepEqual(events.data.account, { vip: 0 });
 });
 
-test("bilibili_splash: peak/download 只移除 brand_splash", () => {
+test("splash_ad: peak/download 只移除 brand_splash", () => {
   const out = run(`${base}/x/resource/peak/download?mobi_app=iphone`, JSON.stringify({
     code: 0,
     data: {
@@ -74,7 +74,19 @@ test("bilibili_splash: peak/download 只移除 brand_splash", () => {
   assert.deepEqual(obj.data.resource[0].list, [{ url: "a" }]);
 });
 
-test("bilibili_splash: 非 JSON 和非开屏路径原样放行", () => {
+test("splash_ad: 通用 splash 响应清空常见广告字段", () => {
+  const out = run("https://example.com/api/splash/list", JSON.stringify({
+    code: 0,
+    data: { show: [{ id: 1 }], ad: { id: 2 }, title: "keep" },
+  }));
+  const obj = JSON.parse(out);
+  assert.deepEqual(obj.data.show, []);
+  assert.deepEqual(obj.data.ad, {});
+  assert.equal(obj.data.title, "keep");
+  assert.equal(obj.code, 0);
+});
+
+test("splash_ad: 非 JSON 和非开屏路径原样放行", () => {
   const raw = "<html>error</html>";
   assert.equal(run(`${base}/x/v2/splash/list`, raw), raw);
 
