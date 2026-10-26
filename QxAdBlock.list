@@ -1,5 +1,7 @@
 # Quantumult X 分流规则：屏蔽广告
 # 用法：在 [filter_remote] 中引用本文件，或将规则粘贴到 [filter_local]。
+# 说明：第三方广告 SDK 优先用分流 REJECT；App 自有广告接口（richmanrules.ksedt.com）
+# 不能整域屏蔽，放到 QxRewrite.conf 用 jxedt_ad.js 改写响应。
 
 # 1rtb.net 广告 SDK（美数科技）
 HOST-SUFFIX, 1rtb.net, REJECT
@@ -12,3 +14,26 @@ HOST-SUFFIX, cm.bilibili.com, REJECT
 
 # B 站行为数据上报（非广告）
 HOST-SUFFIX, dataflow.biliapi.com, REJECT
+
+# 驾校一点通第三方广告 SDK（2026-10 抓包）
+HOST-SUFFIX, adgain.cn, REJECT
+HOST-SUFFIX, datads.cn, REJECT
+HOST-SUFFIX, beizi.biz, REJECT
+HOST-SUFFIX, adn-plus.com.cn, REJECT
+HOST-SUFFIX, ad-scope.com.cn, REJECT
+HOST-SUFFIX, yunxish.com, REJECT
+HOST-SUFFIX, iggrowth.cn, REJECT
+HOST-SUFFIX, gdt.qq.com, REJECT
+HOST-SUFFIX, ugdtimg.com, REJECT
+HOST-SUFFIX, gdtimg.com, REJECT
+HOST-SUFFIX, statisticslinks.com, REJECT
+HOST-SUFFIX, optaim.com, REJECT
+HOST-SUFFIX, miaozhen.com, REJECT
+HOST, partner.uc.cn, REJECT
+HOST, sdk.e.qq.com, REJECT
+HOST, xlog.jd.com, REJECT
+HOST, janapi.jd.com, REJECT
+HOST, legoapi.ksedt.com, REJECT
+HOST, apptwinkle.ksedt.com, REJECT
+HOST, apiwmda.58.com.cn, REJECT
+HOST, feed-image.baidu.com, REJECT
