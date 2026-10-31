@@ -1,16 +1,28 @@
 /*
- * 驾校一点通：放开答题技巧（速记口诀）和顽固错题（错题巩固）两项单点权益。
+ * 驾校一点通：放开答题技巧、顽固错题和 VIP/极速VIP/SVIP 权益。
  *
  * 说明：
  * - getQuestionInfo 的 skillEntity 里本来就带有 qbAnalyse / skillExplain，
  *   客户端根据 vipStatus、buttonText 决定是否隐藏，这里把状态改成已解锁。
- * - 部分版本还会查 VIP 权益，这里只放开 EXAM_SKILL_KM1（答题技巧）和
- *   OVER_REPEAT_WRONG_KM1（顽固错题），不动 VIP / SVIP / SPEED_VIP / 去广告等其他权益。
+ * - batchCheckRights 只放开下面白名单里的权益；PURE_NOADS_VIP、REAL_SIMULATE_KM1、
+ *   JINGJIAN_SINGLE_KM1 等仍保持服务端返回的状态。
  */
 
 var body = $response.body;
 var url = ($request && $request.url) || "";
 var newBody = body;
+
+var OPEN_RIGHTS = [
+    "VIP",
+    "SVIP",
+    "SVIP_LIVECAMP",
+    "RELIABLE_VIP_KM1",
+    "RELIABLE_VIP_KM4",
+    "SPEED_VIP_KM1",
+    "SPEED_VIP_KM2",
+    "SPEED_VIP_KM3",
+    "SPEED_VIP_KM4"
+];
 
 function activateRight(right) {
     if (!right || typeof right !== "object") return;
@@ -20,6 +32,14 @@ function activateRight(right) {
     right.endTime = "2099-12-31";
     right.residualSecond = "2300000000";
     right.overdueSecond = "0";
+}
+
+function activateKnownRights(result) {
+    for (var i = 0; i < OPEN_RIGHTS.length; i++) {
+        activateRight(result[OPEN_RIGHTS[i]]);
+    }
+    activateRight(result.EXAM_SKILL_KM1);
+    activateRight(result.OVER_REPEAT_WRONG_KM1);
 }
 
 try {
@@ -35,8 +55,7 @@ try {
         }
         newBody = JSON.stringify(obj);
     } else if (url.indexOf("/store/batchCheckRights") !== -1 && result && typeof result === "object") {
-        activateRight(result.EXAM_SKILL_KM1);
-        activateRight(result.OVER_REPEAT_WRONG_KM1);
+        activateKnownRights(result);
         newBody = JSON.stringify(obj);
     } else if (url.indexOf("/store/checkRightsOnFunction") !== -1 &&
                result && typeof result === "object" &&

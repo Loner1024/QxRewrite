@@ -57,25 +57,48 @@ test("jxedt_skill: 已是 VIP 时保留原文案和 vipStatus 类型", () => {
   assert.equal(out.result.usesButtonText, "下一题");
 });
 
-test("jxedt_skill: batchCheckRights 放开答题技巧和顽固错题", () => {
-  const body = JSON.stringify({
-    code: 0,
-    msg: "ok",
-    result: {
-      EXAM_SKILL_KM1: { status: "5", level: 0, beginTime: "2026-10-25", endTime: "2026-10-25" },
-      OVER_REPEAT_WRONG_KM1: { status: "5", level: 0, beginTime: "2026-10-25", endTime: "2026-10-25" },
-      PURE_NOADS_VIP: { status: "5", level: 0 },
-    },
-  });
-  const out = JSON.parse(run("https://vipapi.ksedt.com/store/batchCheckRights", body));
-  assert.equal(out.result.EXAM_SKILL_KM1.status, "2");
-  assert.equal(out.result.EXAM_SKILL_KM1.level, 1);
-  assert.equal(out.result.EXAM_SKILL_KM1.endTime, "2099-12-31");
-  assert.equal(out.result.OVER_REPEAT_WRONG_KM1.status, "2");
-  assert.equal(out.result.OVER_REPEAT_WRONG_KM1.level, 1);
-  assert.equal(out.result.OVER_REPEAT_WRONG_KM1.endTime, "2099-12-31");
-  assert.equal(out.result.PURE_NOADS_VIP.status, "5");
-  assert.equal(out.result.PURE_NOADS_VIP.level, 0);
+test("jxedt_skill: batchCheckRights 放开 VIP/极速VIP/SVIP 白名单", () => {
+  const open = [
+    "VIP",
+    "SVIP",
+    "SVIP_LIVECAMP",
+    "RELIABLE_VIP_KM1",
+    "RELIABLE_VIP_KM4",
+    "SPEED_VIP_KM1",
+    "SPEED_VIP_KM2",
+    "SPEED_VIP_KM3",
+    "SPEED_VIP_KM4",
+    "EXAM_SKILL_KM1",
+    "OVER_REPEAT_WRONG_KM1",
+  ];
+  const closed = [
+    "PURE_NOADS_VIP",
+    "REAL_SIMULATE_KM1",
+    "JINGJIAN_SINGLE_KM1",
+    "SVIP_EXP",
+    "VIP_KM1_EXP",
+    "VIP_KM4_EXP",
+    "RELIABLE_VIP_KM1_T",
+  ];
+  const result = {};
+  for (const key of open.concat(closed)) {
+    result[key] = { status: "5", level: 0, beginTime: "2026-10-25", endTime: "2026-10-25" };
+  }
+
+  const out = JSON.parse(run(
+    "https://vipapi.ksedt.com/store/batchCheckRights",
+    JSON.stringify({ code: 0, msg: "ok", result }),
+  ));
+
+  for (const key of open) {
+    assert.equal(out.result[key].status, "2", key);
+    assert.equal(out.result[key].level, 1, key);
+    assert.equal(out.result[key].endTime, "2099-12-31", key);
+  }
+  for (const key of closed) {
+    assert.equal(out.result[key].status, "5", key);
+    assert.equal(out.result[key].level, 0, key);
+  }
 });
 
 test("jxedt_skill: 只返回顽固错题权益时也能放开", () => {
@@ -84,17 +107,23 @@ test("jxedt_skill: 只返回顽固错题权益时也能放开", () => {
     msg: "ok",
     result: {
       OVER_REPEAT_WRONG_KM1: { status: "5", level: 0, residualSecond: "0", endTime: "2026-10-31" },
-      SPEED_VIP_KM1: { status: "5", level: 0 },
+      REAL_SIMULATE_KM1: { status: "5", level: 0 },
     },
   });
   const out = JSON.parse(run("https://vipapi.ksedt.com/store/batchCheckRights", body));
   assert.equal(out.result.OVER_REPEAT_WRONG_KM1.status, "2");
   assert.equal(out.result.OVER_REPEAT_WRONG_KM1.residualSecond, "2300000000");
-  assert.equal(out.result.SPEED_VIP_KM1.status, "5");
+  assert.equal(out.result.REAL_SIMULATE_KM1.status, "5");
 });
 
-test("jxedt_skill: 没有 EXAM_SKILL_KM1 时保持原样", () => {
-  const body = JSON.stringify({ code: 0, result: { VIP: { status: "5", level: 0 } } });
+test("jxedt_skill: 没有白名单权益时保持原样", () => {
+  const body = JSON.stringify({
+    code: 0,
+    result: {
+      PURE_NOADS_VIP: { status: "5", level: 0 },
+      REAL_SIMULATE_KM1: { status: "5", level: 0 },
+    },
+  });
   assert.equal(run("https://vipapi.ksedt.com/store/batchCheckRights", body), body);
 });
 
