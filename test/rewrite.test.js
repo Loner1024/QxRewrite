@@ -5,6 +5,11 @@ const zlib = require("node:zlib");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
+const EXAMPLE_ROOT = path.join(__dirname, "..", "example", "2026-02-05-140432");
+const skipExampleTests = fs.existsSync(EXAMPLE_ROOT)
+  ? false
+  : "example/ packet captures are not present in this checkout";
+
 function dechunk(buf) {
   let i = 0;
   const chunks = [];
@@ -66,7 +71,7 @@ function extractBody(doneValue) {
   throw new Error("script did not $done() with body string");
 }
 
-test("orange_blur: 去掉 maleInboxCards/list 返回头像 URL 的 blur 段", () => {
+test("orange_blur: 去掉 maleInboxCards/list 返回头像 URL 的 blur 段", { skip: skipExampleTests }, () => {
   const body = decodeExampleBody("example/2026-02-05-140432/8259/response_body");
   const done = runScript("orange_blur.js", { body, reqPath: "/1.0/maleInboxCards/list" });
   const outBody = extractBody(done);
@@ -79,7 +84,7 @@ test("orange_blur: 去掉 maleInboxCards/list 返回头像 URL 的 blur 段", ()
   }
 });
 
-test("orange_blur: 遇到非 JSON body 不应抛错，应原样放行", () => {
+test("orange_blur: 遇到非 JSON body 不应抛错，应原样放行", { skip: skipExampleTests }, () => {
   const raw = fs.readFileSync(
     path.join(__dirname, "..", "example/2026-02-05-140432/8259/response_body"),
     "utf8",
@@ -89,7 +94,7 @@ test("orange_blur: 遇到非 JSON body 不应抛错，应原样放行", () => {
   assert.equal(outBody, raw);
 });
 
-test("orange_membership: wallet/get membership 置为 BASIC", () => {
+test("orange_membership: wallet/get membership 置为 BASIC", { skip: skipExampleTests }, () => {
   const body = decodeExampleBody("example/2026-02-05-140432/8240/response_body");
   const done = runScript("orange_membership.js", { body, reqPath: "/1.0/wallet/get" });
   const outBody = extractBody(done);
@@ -97,7 +102,7 @@ test("orange_membership: wallet/get membership 置为 BASIC", () => {
   assert.equal(obj.membership, "BASIC");
 });
 
-test("orange_membership: 遇到非 JSON body 不应抛错，应原样放行", () => {
+test("orange_membership: 遇到非 JSON body 不应抛错，应原样放行", { skip: skipExampleTests }, () => {
   const raw = fs.readFileSync(
     path.join(__dirname, "..", "example/2026-02-05-140432/8242/response_body"),
     "utf8",

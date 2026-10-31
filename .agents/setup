@@ -31,7 +31,8 @@ else
 # QxRewrite orb notes
 - Plain JavaScript for Quantumult X; no build step and no dependency install.
 - Run the test suite with `node --test` from the repository root.
-- `test/rewrite.test.js` reads gitignored packet captures under `example/`. A fresh clone does not have them, so the orange_blur and orange_membership tests fail with ENOENT and are not regressions. Run `node --test test/jxedt_ad.test.js test/jxedt_skill.test.js test/splash_ad.test.js` to check changes without the captures.
+- `test/rewrite.test.js` reads gitignored packet captures under `example/`. Without them, its four orange_* tests are skipped and `node --test` still passes. Put the captures under `example/` to run them locally.
+- CI runs `node --test` on push to master and on pull requests.
 EOF
   echo "appended orb notes to $guidance"
 fi
