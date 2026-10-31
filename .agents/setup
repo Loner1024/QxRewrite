@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# No package.json or lockfile: the tests use Node's built-in runner, which orb
+# images already ship, so this script verifies the toolchain instead of installing.
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+echo "==> Node.js"
+if ! command -v node >/dev/null 2>&1; then
+  echo "node is not installed; the test suite needs Node.js 18 or newer" >&2
+  exit 1
+fi
+
+node_major="$(node -p 'process.versions.node.split(".")[0]')"
+if (( node_major < 18 )); then
+  echo "Node.js $(node --version) is too old for node --test; install 18 or newer" >&2
+  exit 1
+fi
+echo "node $(node --version); no dependencies to install"
+
+echo "==> Orb agent guidance"
+guidance="$HOME/.config/amp/AGENTS.md"
+mkdir -p "$(dirname "$guidance")"
+marker="# QxRewrite orb notes"
+if grep -Fqx "$marker" "$guidance" 2>/dev/null; then
+  echo "guidance already present in $guidance"
+else
+  cat >> "$guidance" <<'EOF'
+
+# QxRewrite orb notes
+- Plain JavaScript for Quantumult X; no build step and no dependency install.
+- Run the test suite with `node --test` from the repository root.
+- `test/rewrite.test.js` reads gitignored packet captures under `example/`. A fresh clone does not have them, so the orange_blur and orange_membership tests fail with ENOENT and are not regressions. Run `node --test test/jxedt_ad.test.js test/jxedt_skill.test.js test/splash_ad.test.js` to check changes without the captures.
+EOF
+  echo "appended orb notes to $guidance"
+fi
