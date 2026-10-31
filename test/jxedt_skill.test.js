@@ -57,12 +57,13 @@ test("jxedt_skill: 已是 VIP 时保留原文案和 vipStatus 类型", () => {
   assert.equal(out.result.usesButtonText, "下一题");
 });
 
-test("jxedt_skill: batchCheckRights 只放开 EXAM_SKILL_KM1", () => {
+test("jxedt_skill: batchCheckRights 放开答题技巧和顽固错题", () => {
   const body = JSON.stringify({
     code: 0,
     msg: "ok",
     result: {
       EXAM_SKILL_KM1: { status: "5", level: 0, beginTime: "2026-10-25", endTime: "2026-10-25" },
+      OVER_REPEAT_WRONG_KM1: { status: "5", level: 0, beginTime: "2026-10-25", endTime: "2026-10-25" },
       PURE_NOADS_VIP: { status: "5", level: 0 },
     },
   });
@@ -70,8 +71,26 @@ test("jxedt_skill: batchCheckRights 只放开 EXAM_SKILL_KM1", () => {
   assert.equal(out.result.EXAM_SKILL_KM1.status, "2");
   assert.equal(out.result.EXAM_SKILL_KM1.level, 1);
   assert.equal(out.result.EXAM_SKILL_KM1.endTime, "2099-12-31");
+  assert.equal(out.result.OVER_REPEAT_WRONG_KM1.status, "2");
+  assert.equal(out.result.OVER_REPEAT_WRONG_KM1.level, 1);
+  assert.equal(out.result.OVER_REPEAT_WRONG_KM1.endTime, "2099-12-31");
   assert.equal(out.result.PURE_NOADS_VIP.status, "5");
   assert.equal(out.result.PURE_NOADS_VIP.level, 0);
+});
+
+test("jxedt_skill: 只返回顽固错题权益时也能放开", () => {
+  const body = JSON.stringify({
+    code: 0,
+    msg: "ok",
+    result: {
+      OVER_REPEAT_WRONG_KM1: { status: "5", level: 0, residualSecond: "0", endTime: "2026-10-31" },
+      SPEED_VIP_KM1: { status: "5", level: 0 },
+    },
+  });
+  const out = JSON.parse(run("https://vipapi.ksedt.com/store/batchCheckRights", body));
+  assert.equal(out.result.OVER_REPEAT_WRONG_KM1.status, "2");
+  assert.equal(out.result.OVER_REPEAT_WRONG_KM1.residualSecond, "2300000000");
+  assert.equal(out.result.SPEED_VIP_KM1.status, "5");
 });
 
 test("jxedt_skill: 没有 EXAM_SKILL_KM1 时保持原样", () => {
@@ -79,10 +98,13 @@ test("jxedt_skill: 没有 EXAM_SKILL_KM1 时保持原样", () => {
   assert.equal(run("https://vipapi.ksedt.com/store/batchCheckRights", body), body);
 });
 
-test("jxedt_skill: 只放开 TRAIN_EXAM 的功能校验", () => {
+test("jxedt_skill: 只放开 TRAIN_EXAM 和 OverRepeatWrong 的功能校验", () => {
   const body = JSON.stringify({ code: 0, msg: "ok", result: { replyResult: false } });
   const on = JSON.parse(run("https://vipapi.ksedt.com/store/checkRightsOnFunction?kemuType=1&placeType=TRAIN_EXAM", body));
   assert.equal(on.result.replyResult, true);
+
+  const wrong = JSON.parse(run("https://vipapi.ksedt.com/store/checkRightsOnFunction?kemuType=1&placeType=OverRepeatWrong", body));
+  assert.equal(wrong.result.replyResult, true);
 
   const other = JSON.parse(run("https://vipapi.ksedt.com/store/checkRightsOnFunction?kemuType=1&placeType=OTHER", body));
   assert.equal(other.result.replyResult, false);
